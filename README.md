@@ -4,12 +4,6 @@
 
 ---
 
-# Multi-Cloud KMS Lab (AWS | Azure | GCP)
-
-> **Tagline:** Learn, build, and compare cloud-native key management from zero to advanced — with diagrams, analogies, and hands-on IaC — using AWS KMS, Azure Key Vault (Keys), and Google Cloud KMS.
-
----
-
 ## 🧠 Why This Course?
 
 Think of **KMS** as the **vault** inside a fortress.  
