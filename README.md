@@ -1,114 +1,76 @@
-# Multi-Cloud KMS Lab (AWS | Azure | GCP)
-
-> Learn, build, and compare cloud-native key management from zero to advanced — with diagrams, analogies, and hands-on IaC — using AWS KMS, Azure Key Vault (Keys), and Google Cloud KMS.
-
----
-
-## 🔗 Quick Launch
-
-- ▶ **Start Day 1:** [KMS Foundations](common/resources/day1-foundations.md)
-- 🟦 **AWS Beginner (Day 2):** [S3 & EBS with KMS](aws/beginner/README.md)
-- 🟩 **Azure Beginner (Day 3):** [Blob + Key Vault](azure/beginner/README.md)
-- 🟨 **GCP Beginner (Day 4):** [Cloud Storage + KMS](gcp/beginner/README.md)
-
-> If a link shows a folder or 404, that lab is just not committed **yet**—we’ll add it next.
+# 🔐 Multi-Cloud KMS Lab  
+**AWS | Azure | GCP Encryption Mastery**  
+Hands-on labs with enterprise architecture patterns
 
 ---
 
-## 📚 Directory (clickable)
+## 🎯 Badges
 
-### Days (1–10)
-1. **[Day 1 — Foundations](common/resources/day1-foundations.md)**  
-2. **[Day 2 — AWS Beginner: S3 & EBS + KMS](aws/beginner/README.md)**  
-3. **[Day 3 — Azure Beginner: Blob + Key Vault](azure/beginner/README.md)**  
-4. **[Day 4 — GCP Beginner: Cloud Storage + KMS](gcp/beginner/README.md)**  
-5. **[Day 5 — Databases & Secrets (AWS/Azure/GCP)](aws/intermediate/README.md)** *(coming soon)*  
-6. **[Day 6 — Cross-Account/Subscription/Project Access](gcp/intermediate/README.md)** *(coming soon)*  
-7. **[Day 7 — Rotation Automation (Cross-Cloud)](cross-cloud/day7-key-rotation-automation/README.md)**  
-8. **[Day 8 — BYOK & External Key Manager](cross-cloud/day8-byok-ekm/README.md)**  
-9. **[Day 9 — Audit & Forensics](cross-cloud/day9-audit/README.md)**  
-10. **[Day 10 — Architecture & Governance](cross-cloud/day10-architecture/README.md)**  
-
-### Cloud Tracks
-- **AWS:** [Beginner](aws/beginner/) • [Intermediate](aws/intermediate/) • [Advanced](aws/advanced/)  
-- **Azure:** [Beginner](azure/beginner/) • [Intermediate](azure/intermediate/) • [Advanced](azure/advanced/)  
-- **GCP:** [Beginner](gcp/beginner/) • [Intermediate](gcp/intermediate/) • [Advanced](gcp/advanced/)  
-
-### Diagrams (anchors)
-- 🔐 [Envelope Encryption](#envelope-encryption-diagram)  
-- 🏛️ [Multi-Cloud Governance](#multi-cloud-governance-diagram)  
+![AWS Badge](https://img.shields.io/badge/AWS-KMS-orange?logo=amazon-aws)
+![Azure Badge](https://img.shields.io/badge/Azure-Key_Vault-blue?logo=microsoft-azure)
+![GCP Badge](https://img.shields.io/badge/GCP-KMS-yellow?logo=google-cloud)
+![IaC Badge](https://img.shields.io/badge/IaC-Terraform%20%7C%20CloudFormation%20%7C%20ARM%20%7C%20GDM-9cf?logo=terraform)
+![Editor Badge](https://img.shields.io/badge/Editor-nano-green?logo=gnu)
+![Learning Style](https://img.shields.io/badge/Textbook-Hands--On-success)
 
 ---
 
-## 🧭 How to Use This Repo
+## ✅ Student Progress Tracker
 
-1) Pick your **Day** from the list above.  
-2) Open the lab file (always nano-first).  
-3) Follow the **CLI + IaC** steps, validate, and run the cleanup.  
-4) Commit your notes as you go.
+| Day | Topic | Status |
+|---:|-------|:------:|
+| 1 | Foundations | ✅ |
+| 2 | AWS Beginner | 🔄 In Progress |
+| 3 | Azure Beginner | ⏳ Pending |
+| 4 | GCP Beginner | ⏳ Pending |
+| 5 | Databases & Secrets | ⏳ Pending |
+| 6 | Cross-cloud Access | ⏳ Pending |
+| 7 | Rotation Automation | ⏳ Pending |
+| 8 | BYOK & HSM | ⏳ Pending |
+| 9 | Audit & Forensics | ⏳ Pending |
+| 10 | Architecture Review + Exam | ⏳ Pending |
 
-```bash
-# examples
-nano aws/beginner/README.md
-nano azure/beginner/README.md
-nano gcp/beginner/README.md
-🧩 Concept: KMS in Plain Words
-KMS is your vault. Apps never carry the master key; they ask the vault to lock/unlock data keys and everything is audited.
+> Progress automatically updated through commits ✅
 
-✅ Prereqs (Quick Check)
-bash
-Copy code
-aws sts get-caller-identity
-az account show --query "{tenant:tenantId, subscription:id}"
-gcloud config list --format='value(core.project)'
-terraform -version
-🔐 Envelope Encryption Diagram
-Envelope Encryption Diagram
-mermaid
-Copy code
-sequenceDiagram
-    participant App
-    participant KMS as Vault (KMS/HSM)
-    participant Store as Storage
-    App->>KMS: Generate Data Key
-    KMS-->>App: {PlaintextDK, CiphertextDK}
-    App->>Store: Save {EncryptedData + CiphertextDK}
-    App->>KMS: Decrypt CiphertextDK when needed
-    App->>App: Decrypt Data (short-lived key)
-🏛️ Multi-Cloud Governance Diagram
-Multi-Cloud Governance Diagram
-mermaid
-Copy code
+---
+
+## 📚 Table of Contents
+
+- ▶ **[Day 1 — Foundations](common/resources/day1-foundations.md)**
+- ▶ **[Day 2 — AWS Beginner: S3 + EBS + KMS](aws/beginner/README.md)**
+- ▶ **Day 3 — Azure Beginner: Blob + Key Vault** (Coming Soon)
+- ▶ **Day 4 — GCP Beginner: Cloud Storage + KMS** (Coming Soon)
+- ▶ **Days 5–10 — Multi-Cloud Advancing Topics** (Coming Soon)
+
+---
+
+## 🧩 Core Concept: Why KMS?
+
+KMS is the **vault** inside a cloud fortress that handles encryption so your applications never touch the master key.
+
+---
+
+## 📌 Envelope Encryption (High-Level)
+
+```mermaid
 flowchart LR
-  subgraph AWS
-    A[KMS CMK] --> AR[IAM Roles/Policies]
-  end
-  subgraph Azure
-    B[Key Vault Keys] --> BR[Entra ID RBAC]
-  end
-  subgraph GCP
-    C[Cloud KMS Keys] --> CR[Service Accounts]
-  end
-  A --- G(((Central Logs)))
-  B --- G
-  C --- G
-  classDef default fill:#f7f9ff,stroke:#6b7cff,stroke-width:1px
-🧹 Cleanup & Safety
-Least privilege on all identities
+A[Plaintext Data] -->|Encrypt with DK| B[Encrypted Data]
+B --> C[Ciphertext Data Key]
+C -->|Unlock via KMS| A
+🔐 KMS = Vault Authority
+📦 Data Key = Worker Lock
+🛑 App never sees the Master Key
 
-Enable logging before usage
+🧠 Learning Format
+Textbook style lessons 📘
 
-Use customer-managed keys for control
+Hands-on cloud labs 🧪
 
-Always include teardown commands
+Automation (Terraform + Native IaC) ⚙️
 
-✉️ Feedback / TODOs
- Add Day 2 fully (AWS Beginner)
+Validation + Cleanup ✅
 
- Add Day 3 fully (Azure Beginner)
+Interview-style knowledge checks 🧠
 
- Add Day 4 fully (GCP Beginner)
-
- Add database encryption labs (Day 5)
-
- Add cross-account/project labs (Day 6)
+📌 Begin now → Day 1: Foundations
+📌 Next → Day 2: AWS Beginner
