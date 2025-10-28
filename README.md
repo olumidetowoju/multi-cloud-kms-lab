@@ -1,102 +1,114 @@
 # Multi-Cloud KMS Lab (AWS | Azure | GCP)
 
-> **Tagline:** Learn, build, and compare cloud-native key management from zero to advanced — with diagrams, analogies, and hands-on IaC — using AWS KMS, Azure Key Vault (Keys), and Google Cloud KMS.
+> Learn, build, and compare cloud-native key management from zero to advanced — with diagrams, analogies, and hands-on IaC — using AWS KMS, Azure Key Vault (Keys), and Google Cloud KMS.
 
 ---
 
-## 🧠 Why This Course?
+## 🔗 Quick Launch
 
-Think of **KMS** as the **vault** inside a fortress.  
-Applications never handle the master key — they **request encryption services** from the vault.
+- ▶ **Start Day 1:** [KMS Foundations](common/resources/day1-foundations.md)
+- 🟦 **AWS Beginner (Day 2):** [S3 & EBS with KMS](aws/beginner/README.md)
+- 🟩 **Azure Beginner (Day 3):** [Blob + Key Vault](azure/beginner/README.md)
+- 🟨 **GCP Beginner (Day 4):** [Cloud Storage + KMS](gcp/beginner/README.md)
 
-✅ Keys protected in HSMs  
-✅ Access logged for compliance  
-✅ Zero-trust encryption enabled
-
----
-
-## 🚀 Course Structure (10 Days)
-
-| Day | Focus | Tracks |
-|---:|---|---|
-| 1 | Foundations → Encryption basics | All clouds |
-| 2 | AWS Beginner | S3, EBS |
-| 3 | Azure Beginner | Blob |
-| 4 | GCP Beginner | Cloud Storage |
-| 5 | Databases | RDS, SQL, BigQuery |
-| 6 | Cross-cloud Access | Federation |
-| 7 | Rotation Automation | Terraform & CLI |
-| 8 | BYOK / External Keys | HSM / Import |
-| 9 | Audit & Forensics | Logs & SIEM |
-| 10 | Architecture Review | Exam + Diagrams |
-
-> Every section uses **nano**, CLI, and optional IaC.
+> If a link shows a folder or 404, that lab is just not committed **yet**—we’ll add it next.
 
 ---
 
-## 🧩 Core Concept: Envelope Encryption
+## 📚 Directory (clickable)
 
-**Analogy:**  
-Data is a package.  
-The **data key** locks that one package.  
-The **master key** in KMS locks the data key (you never see the master key).
+### Days (1–10)
+1. **[Day 1 — Foundations](common/resources/day1-foundations.md)**  
+2. **[Day 2 — AWS Beginner: S3 & EBS + KMS](aws/beginner/README.md)**  
+3. **[Day 3 — Azure Beginner: Blob + Key Vault](azure/beginner/README.md)**  
+4. **[Day 4 — GCP Beginner: Cloud Storage + KMS](gcp/beginner/README.md)**  
+5. **[Day 5 — Databases & Secrets (AWS/Azure/GCP)](aws/intermediate/README.md)** *(coming soon)*  
+6. **[Day 6 — Cross-Account/Subscription/Project Access](gcp/intermediate/README.md)** *(coming soon)*  
+7. **[Day 7 — Rotation Automation (Cross-Cloud)](cross-cloud/day7-key-rotation-automation/README.md)**  
+8. **[Day 8 — BYOK & External Key Manager](cross-cloud/day8-byok-ekm/README.md)**  
+9. **[Day 9 — Audit & Forensics](cross-cloud/day9-audit/README.md)**  
+10. **[Day 10 — Architecture & Governance](cross-cloud/day10-architecture/README.md)**  
 
-Even if a thief steals the package, they **cannot decrypt without asking KMS**.
+### Cloud Tracks
+- **AWS:** [Beginner](aws/beginner/) • [Intermediate](aws/intermediate/) • [Advanced](aws/advanced/)  
+- **Azure:** [Beginner](azure/beginner/) • [Intermediate](azure/intermediate/) • [Advanced](azure/advanced/)  
+- **GCP:** [Beginner](gcp/beginner/) • [Intermediate](gcp/intermediate/) • [Advanced](gcp/advanced/)  
 
-### Diagram (Mermaid)
-```mermaid
+### Diagrams (anchors)
+- 🔐 [Envelope Encryption](#envelope-encryption-diagram)  
+- 🏛️ [Multi-Cloud Governance](#multi-cloud-governance-diagram)  
+
+---
+
+## 🧭 How to Use This Repo
+
+1) Pick your **Day** from the list above.  
+2) Open the lab file (always nano-first).  
+3) Follow the **CLI + IaC** steps, validate, and run the cleanup.  
+4) Commit your notes as you go.
+
+```bash
+# examples
+nano aws/beginner/README.md
+nano azure/beginner/README.md
+nano gcp/beginner/README.md
+🧩 Concept: KMS in Plain Words
+KMS is your vault. Apps never carry the master key; they ask the vault to lock/unlock data keys and everything is audited.
+
+✅ Prereqs (Quick Check)
+bash
+Copy code
+aws sts get-caller-identity
+az account show --query "{tenant:tenantId, subscription:id}"
+gcloud config list --format='value(core.project)'
+terraform -version
+🔐 Envelope Encryption Diagram
+Envelope Encryption Diagram
+mermaid
+Copy code
 sequenceDiagram
     participant App
     participant KMS as Vault (KMS/HSM)
     participant Store as Storage
-    App->>KMS: Request Data Key
+    App->>KMS: Generate Data Key
     KMS-->>App: {PlaintextDK, CiphertextDK}
     App->>Store: Save {EncryptedData + CiphertextDK}
     App->>KMS: Decrypt CiphertextDK when needed
-    App->>App: Decrypt Data Key (short-lived)
-## 🧠 Why This Course?
+    App->>App: Decrypt Data (short-lived key)
+🏛️ Multi-Cloud Governance Diagram
+Multi-Cloud Governance Diagram
+mermaid
+Copy code
+flowchart LR
+  subgraph AWS
+    A[KMS CMK] --> AR[IAM Roles/Policies]
+  end
+  subgraph Azure
+    B[Key Vault Keys] --> BR[Entra ID RBAC]
+  end
+  subgraph GCP
+    C[Cloud KMS Keys] --> CR[Service Accounts]
+  end
+  A --- G(((Central Logs)))
+  B --- G
+  C --- G
+  classDef default fill:#f7f9ff,stroke:#6b7cff,stroke-width:1px
+🧹 Cleanup & Safety
+Least privilege on all identities
 
-Think of **KMS** as the **vault** in a high-security building.  
-Applications are visitors who need valuables (encryption) — but **KMS never gives out the master key**.  
-Instead, it provides temporary “worker keys” to encrypt data and them destroys them fast.
+Enable logging before usage
 
-✅ Keys stay protected  
-✅ Access logged  
-✅ Zero-trust encryption
+Use customer-managed keys for control
 
----
+Always include teardown commands
 
-## ✅ What You Will Learn
+✉️ Feedback / TODOs
+ Add Day 2 fully (AWS Beginner)
 
-| Skill Category | Beginner | Intermediate | Advanced |
-|---------------|:-------:|:------------:|:--------:|
-| Key lifecycle | ✅ | ✅ | ✅ |
-| Envelope encryption | ✅ | ✅ | ✅ |
-| Policies & IAM | ✅ | ✅ | ✅ |
-| Service integration | | ✅ | ✅ |
-| Cross-cloud governance | | | ✅ |
-| BYOK/HSM | | | ✅ |
-| Audit automation | | ✅ | ✅ |
+ Add Day 3 fully (Azure Beginner)
 
----
+ Add Day 4 fully (GCP Beginner)
 
-## 📅 Course Map (10 Days)
+ Add database encryption labs (Day 5)
 
-| Day | Focus |
-|---:|-------|
-| 1 | Foundations — Crypto, Envelope Encryption, IAM |
-| 2 | AWS Beginner — S3 & EBS Encryption w/ CMK |
-| 3 | Azure Beginner — Blob Encryption w/ Key Vault |
-| 4 | GCP Beginner — Cloud Storage Encryption |
-| 5 | Databases & Secrets Encryption |
-| 6 | Cross-Account / Cross-Subscription / Cross-Project Access |
-| 7 | Auto Key Rotation (Terraform & CLI) |
-| 8 | BYOK — Importing & External Keys |
-| 9 | Logging & Forensics — CloudTrail / Monitor / Audit Logs |
-| 10 | Multi-Cloud Architecture + Hands-on Exam |
-
----
-
-## 🏗️ Repository Layout
-
-
+ Add cross-account/project labs (Day 6)
