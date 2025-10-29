@@ -21,6 +21,32 @@
 
 ---
 
+## 🧩 Day 5 – Databases Encryption with CMEK (AWS | Azure | GCP)
+
+> **Goal:** Apply customer-managed encryption keys to database services across all major clouds.
+
+| Cloud | Service | Encryption | IaC Example | Status |
+|-------|----------|-------------|--------------|---------|
+| ☁️ AWS | RDS (PostgreSQL) | AWS KMS + IAM Auth | [Terraform & CloudFormation](aws/day5/iac) | ✅ |
+| ☁️ Azure | PostgreSQL Flexible Server | Azure Key Vault (CMK) | [Terraform & ARM](azure/day5/iac) | ✅ |
+| ☁️ GCP | Cloud SQL (PostgreSQL) | Cloud KMS (CMEK) + Secret Manager | [Terraform](gcp/day5/iac) | ✅ |
+
+### 🌐 Visual Overview
+```mermaid
+flowchart LR
+  subgraph AWS
+    A1[RDS (PostgreSQL)] --> K1[AWS KMS Key]
+  end
+  subgraph Azure
+    A2[PostgreSQL Flex Server] --> K2[Azure Key Vault Key]
+  end
+  subgraph GCP
+    A3[Cloud SQL PostgreSQL] --> K3[Cloud KMS Key]
+    A3 --> S3[Secret Manager (admin pw)]
+  end
+  K1 & K2 & K3 --> M[🧭 Multi-Cloud Key Governance (CMK/CMEK)]
+Progress: 🟩🟩🟩🟩🟩⬜⬜⬜⬜⬜ (5 of 10 days complete)
+
 ## 🧠 Visual Concept – Envelope Encryption
 
 ```mermaid
