@@ -1,76 +1,55 @@
-# 🔐 Multi-Cloud KMS Lab  
-**AWS | Azure | GCP Encryption Mastery**  
-Hands-on labs with enterprise architecture patterns
+# 🔐 Multi-Cloud KMS Lab — AWS | Azure | GCP
+
+> Learn, build, automate, and compare Key Management across the top 3 clouds — from beginner → advanced — with encryption applied to real cloud assets: Storage, Databases, Secrets, IAM, BYOK, Rotation & Monitoring.
 
 ---
 
-## 🎯 Badges
+## ✅ Course Progress
 
-![AWS Badge](https://img.shields.io/badge/AWS-KMS-orange?logo=amazon-aws)
-![Azure Badge](https://img.shields.io/badge/Azure-Key_Vault-blue?logo=microsoft-azure)
-![GCP Badge](https://img.shields.io/badge/GCP-KMS-yellow?logo=google-cloud)
-![IaC Badge](https://img.shields.io/badge/IaC-Terraform%20%7C%20CloudFormation%20%7C%20ARM%20%7C%20GDM-9cf?logo=terraform)
-![Editor Badge](https://img.shields.io/badge/Editor-nano-green?logo=gnu)
-![Learning Style](https://img.shields.io/badge/Textbook-Hands--On-success)
-
----
-
-## ✅ Student Progress Tracker
-
-| Day | Topic | Status |
-|---:|-------|:------:|
-| 1 | Foundations | ✅ |
-| 2 | AWS Beginner | 🔄 In Progress |
-| 3 | Azure Beginner | ⏳ Pending |
-| 4 | GCP Beginner | ⏳ Pending |
-| 5 | Databases & Secrets | ⏳ Pending |
-| 6 | Cross-cloud Access | ⏳ Pending |
-| 7 | Rotation Automation | ⏳ Pending |
-| 8 | BYOK & HSM | ⏳ Pending |
-| 9 | Audit & Forensics | ⏳ Pending |
-| 10 | Architecture Review + Exam | ⏳ Pending |
-
-> Progress automatically updated through commits ✅
+| Day | Cloud | Topic | Status | Link |
+|---:|:------|-------|:-----:|------|
+| 1 | ☁️ Multi-Cloud | Encryption Fundamentals | ✅ | [Day 1 – Foundations](common/resources/day1-foundations.md) |
+| 2 | 🟦 AWS | Beginner – S3 + EBS + KMS CMK | ✅ | [Day 2 – AWS Beginner](aws/beginner/README.md) |
+| 3 | 🟩 Azure | Beginner – Blob + Key Vault CMK | ✅ | [Day 3 – Azure Beginner](azure/beginner/README.md) |
+| 4 | 🟨 GCP | Beginner – Storage + Cloud KMS CMEK | ✅ | [Day 4 – GCP Beginner](gcp/beginner/README.md) |
+| 5 | ☁️ Multi-Cloud | Databases + Secrets Encryption | 🔄 | 🚧 Coming Next |
+| 6 | ☁️ Multi-Cloud | Key Access Federation | 🔄 | 🚧 Coming Soon |
+| 7 | ☁️ Multi-Cloud | Rotation Automation (Terraform) | 🔄 | 🚧 Coming Soon |
+| 8 | ☁️ Multi-Cloud | BYOK / HSM Integration | 🔄 | 🚧 Coming Soon |
+| 9 | ☁️ Multi-Cloud | Governance + Monitoring | 🔄 | 🚧 Coming Soon |
+| 10 | ☁️ Multi-Cloud | Incident Response | 🔄 | 🚧 Coming Soon |
 
 ---
 
-## 📚 Table of Contents
-
-- ▶ **[Day 1 — Foundations](common/resources/day1-foundations.md)**
-- ▶ **[Day 2 — AWS Beginner: S3 + EBS + KMS](aws/beginner/README.md)**
-- ▶ **Day 3 — Azure Beginner: Blob + Key Vault** (Coming Soon)
-- ▶ **Day 4 — GCP Beginner: Cloud Storage + KMS** (Coming Soon)
-- ▶ **Days 5–10 — Multi-Cloud Advancing Topics** (Coming Soon)
-
----
-
-## 🧩 Core Concept: Why KMS?
-
-KMS is the **vault** inside a cloud fortress that handles encryption so your applications never touch the master key.
-
----
-
-## 📌 Envelope Encryption (High-Level)
+## 🧠 Visual Concept – Envelope Encryption
 
 ```mermaid
-flowchart LR
-A[Plaintext Data] -->|Encrypt with DK| B[Encrypted Data]
-B --> C[Ciphertext Data Key]
-C -->|Unlock via KMS| A
-🔐 KMS = Vault Authority
-📦 Data Key = Worker Lock
-🛑 App never sees the Master Key
-
-🧠 Learning Format
-Textbook style lessons 📘
-
-Hands-on cloud labs 🧪
-
-Automation (Terraform + Native IaC) ⚙️
-
-Validation + Cleanup ✅
-
-Interview-style knowledge checks 🧠
-
-📌 Begin now → Day 1: Foundations
-📌 Next → Day 2: AWS Beginner
+sequenceDiagram
+    participant App
+    participant KMS as KMS (HSM)
+    participant Store as Data Store
+    App ->> KMS: Generate Data Key
+    KMS -->> App: Plaintext DK + Ciphertext DK
+    App ->> Store: Encrypt data w/ Plaintext DK + store Ciphertext DK
+    App ->> KMS: Decrypt Ciphertext DK (when needed)
+    App ->> Store: Decrypt data in-memory only
+📂 Repo Structure
+text
+Copy code
+multi-cloud-kms-lab/
+├── README.md  ← You Are Here ✅
+├── aws/
+│   ├── beginner/
+│   │   ├── README.md ✅ Day 2
+│   │   └── iac/terraform + cloudformation
+├── azure/
+│   ├── beginner/
+│   │   ├── README.md ✅ Day 3
+│   │   └── iac/arm + terraform
+├── gcp/
+│   ├── beginner/
+│   │   ├── README.md ✅ Day 4
+│   │   └── iac/terraform + dm (optional)
+└── common/
+    └── resources/day1-foundations.md ✅ Day 1
+🚀 Continue to Day 5 → Databases & Secrets Encryption
