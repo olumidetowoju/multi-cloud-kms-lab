@@ -8,7 +8,7 @@
 
 | Cloud | Service | Encryption | Status | Link |
 |:------|:---------|:------------|:-------|:------|
-| ![AWS Badge](https://img.shields.io/badge/AWS-orange?logo=amazon-aws&logoColor=white) | **RDS PostgreSQL + Secrets Manager** | 🔐 KMS CMK | ✅ Completed | [View AWS Lab](../../aws/day5/README.md) |
+| ![AWS Badge](https://img.shields.io/badge/AWS-orange?logo=amazon-aws&logoColor=white) | **RDS PostgreSQL + Secrets Manager** | 🔐 KMS CMK | ✅ Completed | [View AWS Lab](../../aws/day5-databases/README.md) |
 | ![Azure Badge](https://img.shields.io/badge/Azure-blue?logo=microsoft-azure&logoColor=white) | **PostgreSQL Flexible Server + Key Vault** | 🔐 CMK + MI | ✅ Completed | [View Azure Lab](../../azure/day5/README.md) |
 | ![GCP Badge](https://img.shields.io/badge/GCP-gray?logo=google-cloud&logoColor=white) | **Cloud SQL PostgreSQL + Cloud KMS** | 🔐 CMEK | ⏳ Pending | [View GCP Lab](../../gcp/day5/README.md) |
 
