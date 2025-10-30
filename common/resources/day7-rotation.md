@@ -10,7 +10,7 @@ flowchart LR
         C --> D["Terraform alias switch step"]
         D --> A
     end
-    Note right of A: Logs & Alerts → CloudTrail / Key Vault logs / GCP Audit
+    E["CloudTrail / Key Vault logs / GCP Audit<br/>(Monitoring & Alerts)"] -.-> A
 Patterns
 
 AWS: enable_key_rotation = true (annual for symmetric keys) + alias pattern for manual rotation.
