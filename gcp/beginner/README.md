@@ -43,9 +43,11 @@ cat decrypted.txt
 ## 🧭 Architecture Diagram
 ```mermaid
 flowchart LR
-  A[App / Cloud Shell] --> B[Cloud KMS KeyRing: day4-ring]
-  B --> C[KMS Key: day4-key (symmetric)]
-  C --> D[Encrypt / Decrypt Data]
+  A["App / Cloud Shell User"] --> B["Key Ring (day4-ring)"]
+  B --> C["Crypto Key (day4-key, Symmetric)"]
+  C --> D["Encrypt Data (sample.txt → sample.enc)"]
+  D --> E["Decrypt Data (sample.enc → decrypted.txt)"]
+  E --> A
 ```
 
 Tagging: mc-lab=kms-day4 (labels/annotations where applicable)
