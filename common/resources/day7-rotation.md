@@ -4,14 +4,15 @@
 
 ```mermaid
 flowchart LR
-    A["Apps use alias (alias/mc-day7-data)"] --> B["KMS Key v1"]
+    A["Apps use alias (alias/mc-day7-data)"] --> B["KMS Key v1"];
     subgraph Rotation_Cycle
-        B --> C["KMS Key v2 (auto-rotate)"]
-        C --> D["Terraform alias switch"]
-        D --> A
+        B --> C["KMS Key v2 (auto-rotate)"];
+        C --> D["Terraform alias switch"];
+        D --> A;
     end
-    E["Monitoring: CloudTrail / Key Vault logs / GCP Audit"]
-    E -.-> A
+    E["Monitoring: CloudTrail / Key Vault logs / GCP Audit"];
+    E -.-> A;
+```
 
 Patterns
 
