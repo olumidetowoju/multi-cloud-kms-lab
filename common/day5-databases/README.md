@@ -26,31 +26,32 @@
 
 ```mermaid
 flowchart LR
-  subgraph AWS
-    RDS[(RDS PostgreSQL)]
-    AWSKMS[(AWS KMS CMK)]
-    SecretMgr[(Secrets Manager)]
-    RDS --> AWSKMS
-    RDS --> SecretMgr
-  end
+    subgraph AWS
+        RDS[(RDS PostgreSQL)]
+        AWSKMS[(AWS KMS CMK)]
+        SecretMgr[(Secrets Manager)]
+        RDS --> AWSKMS
+        RDS --> SecretMgr
+    end
 
-  subgraph Azure
-    PGFS[(PostgreSQL Flexible Server)]
-    KV[(Key Vault Key)]
-    MI[(Managed Identity)]
-    PGFS --> KV
-    PGFS --> MI
-  end
+    subgraph Azure
+        PGFS[(PostgreSQL Flexible Server)]
+        KV[(Key Vault Key)]
+        MI[(Managed Identity)]
+        PGFS --> KV
+        PGFS --> MI
+    end
 
-  subgraph GCP
-    SQL[(Cloud SQL PostgreSQL)]
-    GKMS[(Cloud KMS CMEK)]
-    GSM[(Secret Manager)]
-    SQL --> GKMS
-    SQL --> GSM
-  end
+    subgraph GCP
+        SQL[(Cloud SQL PostgreSQL)]
+        GCKMS[(Cloud KMS CMK)]
+        GSM[(Secret Manager)]
+        SQL --> GCKMS
+        SQL --> GSM
+    end
 
-  AWS --- Azure --- GCP
+    AWS --- Azure --- GCP
+```
 🧩 Lab Directories
 Folder	Purpose
 aws/day5/	AWS RDS PostgreSQL encrypted with AWS KMS
