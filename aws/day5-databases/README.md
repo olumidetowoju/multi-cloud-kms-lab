@@ -15,18 +15,15 @@ In this lab you’ll combine three AWS security layers:
 ## 🧱 Architecture Diagram
 ```mermaid
 flowchart TB
-  subgraph AWS
-    KMS[(KMS CMK)]
-    RDS[(RDS PostgreSQL)]
-    SM[(Secrets Manager)]
-  end
+    subgraph AWS
+        A[KMS CMK]
+        B[RDS (PostgreSQL)]
+        C[Secrets Manager]
+    end
 
-  App[Client App] --> SM :::secret
-  SM --> RDS :::db
-  RDS --> KMS :::kms
-  style KMS fill:#f3f0ff,stroke:#906cff
-  style SM fill:#f9f7d0,stroke:#bca600
-  style RDS fill:#e2f0ff,stroke:#0078d4
+    D[Client App] --> C
+    C --> B
+    B --> A
 ```
 pgsql
 Copy code
