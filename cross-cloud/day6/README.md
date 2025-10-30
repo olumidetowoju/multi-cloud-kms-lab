@@ -15,16 +15,20 @@ Think of the data as a locked box and the DEK as the small key for that box. Eac
 ## 🔎 Diagram — Re-wrap Flow
 ```mermaid
 sequenceDiagram
-  participant App
-  participant AWS as AWS KMS (alias/mc-day6)
-  participant AZ as Azure Key Vault (mc-day6-key)
-  participant GCP as GCP KMS (mc-day6-key)
-  App->>AWS: GenerateDataKey ⇒ {Plain, Ciphertext}
-  App->>App: Encrypt payload with Plain (AES-256-CBC)
-  App->>AWS: Store Ciphertext(DEK) → dek.aws.bin
-  App->>AZ: Decrypt via AWS ⇒ Plain → RSA-OAEP-256 → dek.az.bin
-  App->>GCP: Decrypt via AWS ⇒ Plain → CMEK encrypt → dek.gcp.bin
-  Note over App: data.enc + dek.aws.bin + dek.az.bin + dek.gcp.bin
+    autonumber
+    participant App
+    participant AWS as AWS KMS (alias/mc-day6)
+    participant AZ as Azure Key Vault (mc-day6-key)
+    participant GCP as GCP KMS (mc-day6-key)
+
+    App->>AWS: GenerateDataKey
+    AWS-->>App: Plaintext DEK + Ciphertext DEK
+    App->>App: Encrypt data with Plaintext DEK (AES-256-CBC) → data.enc
+    App->>AWS: Save Ciphertext DEK → dek.aws.bin
+    App->>AZ: Decrypt via AWS → Plaintext DEK\nWrap RSA-OAEP-256 → dek.az.bin
+    App->>GCP: Decrypt via AWS → Plaintext DEK\nEncrypt with CMEK → dek.gcp.bin
+    Note over App: App keeps data.enc + per-cloud wrapped DEKs
+```
 🗺️ What you’ll build
 AWS: KMS Key A + role mc-day6-app with minimal Encrypt/Decrypt on Key A
 
