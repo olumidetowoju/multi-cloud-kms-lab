@@ -13,7 +13,7 @@
 | 3 | 🟩 Azure | Beginner – Blob + Key Vault CMK | ✅ | [Day 3 – Azure Beginner](azure/beginner/README.md) |
 | 4 | 🟨 GCP | Beginner – Storage + Cloud KMS CMEK | ✅ | [Day 4 – GCP Beginner](gcp/beginner/README.md) |
 | 5 | 🌐 **Multi-Cloud** | Databases & Secrets Encryption | ✅ | [Day 5 – Multi-Cloud Databases](common/day5-databases/README.md) |
-| 6 | ☁️ Multi-Cloud | Key Access Federation | 🔄 | 🚧 Coming Soon |
+| 6 | 🌐 Multi-Cloud | Key Access Federation (DEK Re-wrap: AWS→Azure→GCP) | ✅ | [Day 6 – Cross-Cloud Federation](cross-cloud/day6/README.md) |
 | 7 | ☁️ Multi-Cloud | Rotation Automation (Terraform) | 🔄 | 🚧 Coming Soon |
 | 8 | ☁️ Multi-Cloud | BYOK / HSM Integration | 🔄 | 🚧 Coming Soon |
 | 9 | ☁️ Multi-Cloud | Governance + Monitoring | 🔄 | 🚧 Coming Soon |
