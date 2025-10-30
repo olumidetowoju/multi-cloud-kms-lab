@@ -16,20 +16,21 @@
 ## 🧱 Architecture Diagram
 ```mermaid
 flowchart TB
-  subgraph Azure
-    KV["Key Vault (Keys + Secrets)"]
-    KEY["CMK: mc-day5-pg (RSA)"]
-    SEC["Secret: pg-admin"]
-    PG["PostgreSQL Flexible Server"]
-    UAMI["User-Assigned Managed Identity"]
-  end
+    subgraph Azure
+        KV["Key Vault (Keys + Secrets)"]
+        KEY["CMK: mc-day5-pg (RSA)"]
+        SEC["Secret: pg-admin"]
+        PG["PostgreSQL Flexible Server"]
+        UAMI["User-Assigned Managed Identity"]
+    end
 
-  DEV["App / Operator"] -->|TLS| PG
-  PG -- wrap/unwrap --> KEY
-  PG -. uses .-> UAMI
-  DEV -->|read/write| SEC
-  KV --- KEY
-  KV --- SEC
+    DEV["App / Operator"] -->|TLS| PG
+    PG -->|wrap/unwrap| KEY
+    PG -. uses .-> UAMI
+    DEV -->|read/write| SEC
+    KV --> KEY
+    KV --> SEC
+```
 🚀 Quickstart (Terraform)
 Folder: azure/day5/iac/terraform
 
