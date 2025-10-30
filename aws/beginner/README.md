@@ -12,269 +12,63 @@ Multi-Cloud KMS Lab | Region: us-east-1
 
 ---
 
+## 🧠 Concepts Covered
+- **AWS KMS CMK** → central key management for S3 and EBS  
+- **SSE-KMS** → S3 encryption using your CMK  
+- **EBS encryption** → data at rest protection for volumes and snapshots  
+- **CloudTrail** → logs every KMS key operation
+
+---
+
 ## 🧭 Architecture Overview
 ```mermaid
 flowchart TB
     subgraph KMS
-        K1["CMK: alias/mc-day2-beginner"]
+        K1["CMK (alias/mc-day2-beginner)"]
     end
+
     subgraph Compute
-        EC2["t2.micro (temp)"]
+        EC2["EC2 Instance (t2.micro, temp)"]
         EBS["Root EBS Volume"]
     end
-    S3["S3 Bucket (SSE-KMS)"]
-    SNAP["Encrypted Snapshot Copy"]
 
+    subgraph Storage
+        S3["S3 Bucket (mc-day2-beginner)"]
+    end
+
+    User["App / User via AWS CLI"]
+    CloudTrail["CloudTrail / CloudWatch Logs"]
+
+    User --> EC2
     EC2 --> EBS
-    EBS -- Snapshot --> SNAP
-    S3 -- SSE-KMS --> K1
-    SNAP --> K1
-Tagging: all resources use mc-lab=kms-day2 to enable one-shot cleanup.
+    EC2 --> S3
+    EBS --> K1
+    S3 --> K1
+    K1 --> CloudTrail
+```
 
-✅ Prereqs
-AWS CLI authenticated as your lab user
+🧩 Flow summary: Data flows from user to EC2 and S3; both resources encrypt with the same CMK; CloudTrail records all operations.
 
-Default region: us-east-1
+⚙️ Hands-On Steps
+1️⃣ Create a KMS key
+aws kms create-key --description "mc-day2-beginner" --region us-east-1
+aws kms create-alias --alias-name alias/mc-day2-beginner --target-key-id <key-id>
 
-Installed: aws, jq (optional), and permissions for KMS/S3/EC2/CloudTrail
+2️⃣ Create an S3 bucket and enable SSE-KMS
+aws s3api create-bucket --bucket mc-day2-s3 --region us-east-1
+aws s3api put-bucket-encryption --bucket mc-day2-s3 \
+  --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"aws:kms","KMSMasterKeyID":"<key-id>"}}]}'
 
-Quick check:
-
-bash
-Copy code
-aws sts get-caller-identity
-🧪 CLI Lab — Step by Step
-Use these as live commands or as a reference. We already validated them during the hands-on walk-through.
-
-1) Create KMS CMK + Alias
-bash
-Copy code
-export AWS_REGION="us-east-1"
-
-KEY_ID=$(aws kms create-key \
-  --description "KMS Day2 Beginner" \
-  --tags TagKey=mc-lab,TagValue=kms-day2 \
-  --query KeyMetadata.KeyId \
-  --output text --region "$AWS_REGION")
-
-aws kms create-alias \
-  --alias-name alias/mc-day2-beginner \
-  --target-key-id "$KEY_ID" \
-  --region "$AWS_REGION"
-
-aws kms describe-key --key-id "$KEY_ID" \
-  --query 'KeyMetadata.{Enabled:Enabled,Arn:Arn}' --region "$AWS_REGION"
-2) S3 — SSE-KMS object encryption
-bash
-Copy code
-BUCKET="kms-day2-$(date +%s)"
-aws s3api create-bucket --bucket "$BUCKET" --region "$AWS_REGION"
-
-echo "Hello KMS" > demo.txt
-aws s3 cp demo.txt "s3://$BUCKET/demo.txt" \
-  --sse aws:kms --sse-kms-key-id "alias/mc-day2-beginner" --region "$AWS_REGION"
-
-aws s3api head-object --bucket "$BUCKET" --key demo.txt \
-  --query '{SSE:ServerSideEncryption,KMSKey:SSEKMSKeyId}' --region "$AWS_REGION"
-3) EC2 → Snapshot → Encrypted Copy
-bash
-Copy code
-AMI=$(aws ssm get-parameters \
-  --names /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64 \
-  --query 'Parameters[0].Value' --output text --region "$AWS_REGION")
-
-INSTANCE_ID=$(aws ec2 run-instances \
-  --image-id "$AMI" --instance-type t2.micro \
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=mc-lab,Value=kms-day2}]' \
-  --query 'Instances[0].InstanceId' --output text --region "$AWS_REGION")
-
-aws ec2 wait instance-running --instance-ids "$INSTANCE_ID" --region "$AWS_REGION"
-
-ROOT_VOL=$(aws ec2 describe-instances --instance-ids "$INSTANCE_ID" \
-  --query 'Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId' \
-  --output text --region "$AWS_REGION")
-
-SRC_SNAP=$(aws ec2 create-snapshot --volume-id "$ROOT_VOL" \
-  --description "kms-day2-temp-unencrypted" \
-  --query SnapshotId --output text --region "$AWS_REGION")
-
-aws ec2 create-tags --resources "$SRC_SNAP" --tags Key=mc-lab,Value=kms-day2 --region "$AWS_REGION"
-
-ENC_SNAP=$(aws ec2 copy-snapshot --source-region "$AWS_REGION" \
-  --source-snapshot-id "$SRC_SNAP" --encrypted --kms-key-id "alias/mc-day2-beginner" \
-  --description "kms-day2-encrypted-copy" \
-  --query SnapshotId --output text --region "$AWS_REGION")
-
-aws ec2 wait snapshot-completed --snapshot-ids "$ENC_SNAP" --region "$AWS_REGION"
-
-aws ec2 describe-snapshots --snapshot-ids "$ENC_SNAP" \
-  --query 'Snapshots[0].Encrypted' --output text --region "$AWS_REGION"
-# expect: True
-4) CloudTrail evidence (optional)
-bash
-Copy code
-aws cloudtrail lookup-events \
-  --lookup-attributes AttributeKey=EventSource,AttributeValue=kms.amazonaws.com \
-  --max-results 10 --region "$AWS_REGION" \
-  --query 'Events[].EventName'
-🧹 Cleanup (No Billing Risk)
-bash
-Copy code
-# if shell restarted, recover vars:
-# KEY_ID=$(aws kms describe-key --key-id alias/mc-day2-beginner --query 'KeyMetadata.KeyId' --output text --region us-east-1)
-# set the bucket name you created earlier:
-# BUCKET=<your-bucket-name>
-
-aws s3 rm "s3://$BUCKET" --recursive --region us-east-1 || true
-aws s3 rb "s3://$BUCKET" --region us-east-1 || true
-
-aws ec2 terminate-instances --instance-ids "$INSTANCE_ID" --region us-east-1 || true
-aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID" --region us-east-1 || true
-
-aws ec2 delete-snapshot --snapshot-id "$ENC_SNAP" --region us-east-1 || true
-aws ec2 delete-snapshot --snapshot-id "$SRC_SNAP" --region us-east-1 || true
-
-aws kms schedule-key-deletion --key-id "$KEY_ID" --pending-window-in-days 7 --region us-east-1 || true
-Tag audit (should be empty after a minute):
-
-bash
-Copy code
-aws resourcegroupstaggingapi get-resources \
-  --tag-filters Key=mc-lab,Values=kms-day2 \
-  --query 'ResourceTagMappingList[].ResourceARN' --region us-east-1
-⚙️ Terraform Automation (Optional)
-Files:
-
-swift
-Copy code
-aws/beginner/iac/terraform/main.tf
-hcl
-Copy code
-terraform {
-  required_version = ">= 1.5.0"
-  required_providers { aws = { source = "hashicorp/aws", version = "~> 5.0" } }
-}
-provider "aws" { region = var.region }
-
-variable "region"        { default = "us-east-1" }
-variable "bucket_prefix" { default = "kms-day2-tf" }
-variable "alias"         { default = "mc-day2-beginner" }
-
-resource "aws_kms_key" "cmk" {
-  description             = "KMS Day2 Beginner (Terraform)"
-  deletion_window_in_days = 7
-  enable_key_rotation     = true
-  tags = { mc-lab = "kms-day2" }
-}
-
-resource "aws_kms_alias" "alias" {
-  name          = "alias/${var.alias}"
-  target_key_id = aws_kms_key.cmk.key_id
-}
-
-resource "random_id" "rand" { byte_length = 4 }
-
-resource "aws_s3_bucket" "bucket" {
-  bucket = "${var.bucket_prefix}-${random_id.rand.hex}"
-  tags   = { mc-lab = "kms-day2" }
-}
-
-resource "aws_s3_object" "obj" {
-  bucket       = aws_s3_bucket.bucket.id
-  key          = "demo.txt"
-  content      = "Hello KMS (Terraform)"
-  server_side_encryption = "aws:kms"
-  kms_key_id   = aws_kms_alias.alias.arn
-}
-
-output "bucket"  { value = aws_s3_bucket.bucket.id }
-output "key_arn" { value = aws_kms_key.cmk.arn }
-Run:
-
-bash
-Copy code
-cd aws/beginner/iac/terraform
-terraform init
-terraform apply -auto-approve
-# destroy when done
-terraform destroy -auto-approve
-🧱 CloudFormation (Optional)
-File:
-
-swift
-Copy code
-aws/beginner/iac/cloudformation/template.yaml
-yaml
-Copy code
-AWSTemplateFormatVersion: '2010-09-09'
-Description: KMS Day2 Beginner (CFN) - CMK + Alias + S3 Bucket
-Resources:
-  KmsKey:
-    Type: AWS::KMS::Key
-    Properties:
-      Description: "KMS Day2 Beginner (CFN)"
-      EnableKeyRotation: true
-      KeyPolicy:
-        Version: '2012-10-17'
-        Statement:
-          - Sid: AllowAccountRoot
-            Effect: Allow
-            Principal:
-              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
-            Action: 'kms:*'
-            Resource: '*'
-      Tags:
-        - Key: mc-lab
-          Value: kms-day2
-
-  KmsAlias:
-    Type: AWS::KMS::Alias
-    Properties:
-      AliasName: alias/mc-day2-beginner
-      TargetKeyId: !Ref KmsKey
-
-  Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "kms-day2-cfn-${AWS::AccountId}-${AWS::Region}-${AWS::StackName}"
-
-Outputs:
-  KeyId:   { Value: !Ref KmsKey }
-  KeyArn:  { Value: !GetAtt KmsKey.Arn }
-  Bucket:  { Value: !Ref Bucket }
-Deploy:
-
-bash
-Copy code
-cd aws/beginner/iac/cloudformation
-aws cloudformation deploy \
-  --template-file template.yaml \
-  --stack-name kms-day2-beginner-cfn \
-  --capabilities CAPABILITY_NAMED_IAM \
+3️⃣ Launch an EC2 instance with EBS encryption
+aws ec2 run-instances --image-id ami-xxxxxxxx --instance-type t2.micro \
+  --block-device-mappings DeviceName=/dev/xvda,Ebs={Encrypted=true,KmsKeyId=<key-id>} \
   --region us-east-1
-Upload an encrypted object with the alias:
 
-bash
-Copy code
-CFN_BUCKET=$(aws cloudformation describe-stacks --stack-name kms-day2-beginner-cfn \
-  --query 'Stacks[0].Outputs[?OutputKey==`Bucket`].OutputValue' --output text --region us-east-1)
+4️⃣ Verify CloudTrail logs
+aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=Encrypt
 
-echo "CFN hello" > cfn-demo.txt
-aws s3 cp cfn-demo.txt "s3://$CFN_BUCKET/cfn-demo.txt" \
-  --sse aws:kms --sse-kms-key-id alias/mc-day2-beginner --region us-east-1
-Delete stack (bucket must be empty first):
+✅ Outcome
 
-bash
-Copy code
-aws s3 rm "s3://$CFN_BUCKET" --recursive --region us-east-1
-aws cloudformation delete-stack --stack-name kms-day2-beginner-cfn --region us-east-1
-aws cloudformation wait stack-delete-complete --stack-name kms-day2-beginner-cfn --region us-east-1
-🧠 Knowledge Check
-Why is SSE-KMS preferable to SSE-S3 for regulated workloads?
+You’ve encrypted data at rest for S3 and EBS using one CMK and validated key usage with CloudTrail.
 
-What happens if your CMK is disabled before reads?
-
-How do tags help with governance and cleanup?
-
-⏭ Next
-Proceed to Day 3 — Azure Beginner: Blob + Key Vault.
+⬅ Back to Course Overview
