@@ -1,6 +1,6 @@
 # Day 7 – Rotation Automation (Terraform)
 
-> Strategy: **Rotate keys safely, update aliases, and keep apps unaware**.
+> **Strategy:** Rotate keys safely, update aliases, and keep apps unaware.
 
 ```mermaid
 flowchart LR
@@ -12,6 +12,7 @@ flowchart LR
     end
     E["Monitoring: CloudTrail / Key Vault logs / GCP Audit"]
     E -.-> A
+
 Patterns
 
 AWS: enable_key_rotation = true (annual for symmetric keys) + alias pattern for manual rotation.
