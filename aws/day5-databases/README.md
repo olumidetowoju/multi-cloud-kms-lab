@@ -27,6 +27,7 @@ flowchart TB
   style KMS fill:#f3f0ff,stroke:#906cff
   style SM fill:#f9f7d0,stroke:#bca600
   style RDS fill:#e2f0ff,stroke:#0078d4
+```
 pgsql
 Copy code
 
