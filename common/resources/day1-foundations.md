@@ -47,16 +47,31 @@ Even if attackers grab the coin box — they **cannot unlock it** without KMS.
 ## 🔁 Envelope Encryption (Diagram)
 
 ```mermaid
-sequenceDiagram
-    participant App
-    participant KMS as Vault (KMS/HSM)
-    participant Store as Storage
-    App->>KMS: Generate Data Key
-    KMS-->>App: {PlaintextDK, CiphertextDK}
-    App->>App: Encrypt data with PlaintextDK
-    App->>Store: Save {EncryptedData & CiphertextDK}
-    App->>KMS: Decrypt CiphertextDK when needed
-    App->>App: Use plaintext DK briefly to decrypt data
+flowchart LR
+    subgraph Cloud
+        App["App / CLI / Cloud Service"]
+        DK["Data Key (DEK)"]
+    end
+
+    subgraph KMS
+        CMK["Customer Managed Key (CMK)"]
+        Vault["Vault (HSM)"]
+        Audit["Audit Logs / CloudTrail"]
+    end
+
+    App -->|Encrypt/Decrypt Request| CMK
+    CMK --> Vault
+    CMK -->|Generates DEK| DK
+    DK -->|Encrypts Data at Rest| App
+    CMK --> Audit
+```
+
+🧩 Flow Summary
+1️⃣ The app or CLI calls KMS to encrypt/decrypt.
+2️⃣ KMS uses the Customer Managed Key (CMK) in an HSM vault to produce or unwrap a Data Key (DEK).
+3️⃣ The DEK encrypts application data (e.g., S3, Azure Blob, GCS).
+4️⃣ All actions are logged in CloudTrail / Audit Logs.
+
 🔥 Data Keys only live in memory for milliseconds
 Never stored. Never logged.
 
