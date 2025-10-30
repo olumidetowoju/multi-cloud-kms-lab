@@ -16,12 +16,12 @@ In this lab you’ll combine three AWS security layers:
 ```mermaid
 flowchart TB
     subgraph AWS
-        A[KMS CMK]
-        B[RDS (PostgreSQL)]
-        C[Secrets Manager]
+        A["KMS CMK"]
+        B["RDS PostgreSQL"]
+        C["Secrets Manager"]
     end
 
-    D[Client App] --> C
+    D["Client App"] --> C
     C --> B
     B --> A
 ```
