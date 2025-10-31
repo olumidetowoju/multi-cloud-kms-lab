@@ -34,20 +34,18 @@
 ### 🌐 Visual Overview
 ```mermaid
 flowchart LR
-  %% --- Day 5 Visual Overview: DB + CMEK across clouds ---
   subgraph AWS
     A1[RDS (PostgreSQL)] --> K1[AWS KMS Key (CMK)]
   end
 
   subgraph Azure
-    A2[PostgreSQL Flexible Server] --> K2[Key Vault Key (CMK)]
+    A2[PostgreSQL Flexible Server] --> K2[Azure Key Vault Key (CMK)]
   end
 
   subgraph GCP
     A3[Cloud SQL (PostgreSQL)] --> K3[Cloud KMS Key (CMEK)]
   end
 
-  %% All keys protect the same concept: database data-at-rest
   D[(Database Data-at-Rest)]
 
   K1 -->|Encrypts| D
