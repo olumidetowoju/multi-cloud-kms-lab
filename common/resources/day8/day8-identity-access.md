@@ -32,9 +32,6 @@ By the end of this lab, you will:
 
 ## 🧭 Diagram — Cross-Cloud IAM Control Flow
 ```mermaid
-## 🧠 Architecture Diagram
-
-```mermaid
 flowchart TB
   subgraph Audit
     A[AWS CloudTrail Logs] --> X[Central Audit Dashboard]
@@ -59,7 +56,8 @@ flowchart TB
 🪣 Hands-On Steps
 1️⃣ AWS: View Key Usage in CloudTrail
 aws cloudtrail lookup-events \
-  --lookup-attributes AttributeKey=EventName,AttributeValue=Encrypt \
+  --lookup-attributes AttributeKey=EventName
+,AttributeValue=Encrypt \
   --region us-east-1 \
   --query 'Events[0:5].[EventTime,Username,EventName,Resources]'
 
