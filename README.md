@@ -34,23 +34,19 @@
 ### 🌐 Visual Overview
 ```mermaid
 flowchart LR
-  subgraph AWS
-    A1[RDS (PostgreSQL)] --> K1[AWS KMS Key (CMK)]
-  end
-
-  subgraph Azure
-    A2[PostgreSQL Flexible Server] --> K2[Azure Key Vault Key (CMK)]
-  end
-
-  subgraph GCP
-    A3[Cloud SQL (PostgreSQL)] --> K3[Cloud KMS Key (CMEK)]
-  end
-
-  D[(Database Data-at-Rest)]
-
-  K1 -->|Encrypts| D
-  K2 -->|Encrypts| D
-  K3 -->|Encrypts| D
+subgraph AWS
+A1[RDS (PostgreSQL)] --> K1[AWS KMS Key (CMK)]
+end
+subgraph Azure
+A2[PostgreSQL Flexible Server] --> K2[Azure Key Vault Key (CMK)]
+end
+subgraph GCP
+A3[Cloud SQL (PostgreSQL)] --> K3[Cloud KMS Key (CMEK)]
+end
+D[(Database Data-at-Rest)]
+K1 --> D
+K2 --> D
+K3 --> D
 ```
 
 ---
