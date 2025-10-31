@@ -17,7 +17,7 @@
 | 7 | 🌐 Multi-Cloud | Rotation Automation (Terraform) | ✅ | [Day 7 – Rotation Automation](common/resources/day7-rotation.md) |
 | 8 | 🌐 Multi-Cloud | IAM Access + Audit & Monitoring | ✅ | [Day 8 – Identity & Audit](common/resources/day8/day8-identity-access.md) |
 | 9 | 🌐 Multi-Cloud | Governance + Monitoring | ✅ | [Day 9 – Governance & Monitoring](common/resources/day9/day9-governance-monitoring.md) |
-| 10 | ☁️ Multi-Cloud | Incident Response | 🔄 | 🚧 Coming Soon |
+| 10 | 🌐 Multi-Cloud | Incident Response | ✅ | [Day 10 – Incident Response](common/resources/day10/day10-incident-response.md) |
 
 ---
 
