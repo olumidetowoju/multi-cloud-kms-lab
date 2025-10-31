@@ -37,13 +37,22 @@ flowchart LR
   subgraph AWS
     A1[RDS (PostgreSQL)] --> K1[AWS KMS Key]
   end
+
   subgraph Azure
-    A2[PostgreSQL Flex Server] --> K2[Azure Key Vault Key]
+    A2[PostgreSQL Flexible Server] --> K2[Azure Key Vault Key]
   end
+
   subgraph GCP
-    A3[Cloud SQL PostgreSQL] --> K3[Cloud KMS Key]
-    A3 --> S3[Secret Manager (admin pw)]
+    A3[Cloud SQL (PostgreSQL)] --> K3[GCP Cloud KMS Key]
   end
+
+  K1 -->|Encrypts| D1[(Database Data)]
+  K2 -->|Encrypts| D1
+  K3 -->|Encrypts| D1
+```
+
+---
+
   K1 & K2 & K3 --> M[🧭 Multi-Cloud Key Governance (CMK/CMEK)]
 Progress: 🟩🟩🟩🟩🟩⬜⬜⬜⬜⬜ (5 of 10 days complete)
 
