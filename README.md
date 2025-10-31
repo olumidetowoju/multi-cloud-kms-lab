@@ -68,6 +68,10 @@ sequenceDiagram
     App ->> Store: Encrypt data w/ Plaintext DK + store Ciphertext DK
     App ->> KMS: Decrypt Ciphertext DK (when needed)
     App ->> Store: Decrypt data in-memory only
+```
+
+---
+
 📂 Repo Structure
 text
 Copy code
