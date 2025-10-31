@@ -33,7 +33,7 @@
 
 ### 🌐 Visual Overview
 ```mermaid
-flowchart LR
+sequenceDiagram
   subgraph AWS
     A1[RDS (PostgreSQL)] --> K1[AWS KMS Key]
   end
