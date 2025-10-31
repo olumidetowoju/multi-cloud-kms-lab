@@ -33,20 +33,17 @@
 
 ### 🌐 Visual Overview
 ```mermaid
-flowchart LR
-subgraph AWS
-A1[RDS (PostgreSQL)] --> K1[AWS KMS Key (CMK)]
-end
-subgraph Azure
-A2[PostgreSQL Flexible Server] --> K2[Azure Key Vault Key (CMK)]
-end
-subgraph GCP
-A3[Cloud SQL (PostgreSQL)] --> K3[Cloud KMS Key (CMEK)]
-end
-D[(Database Data-at-Rest)]
-K1 --> D
-K2 --> D
-K3 --> D
+sequenceDiagram
+    participant AWS as AWS RDS (PostgreSQL)
+    participant Azure as Azure PostgreSQL Flexible Server
+    participant GCP as GCP Cloud SQL (PostgreSQL)
+    participant Data as Database Data-at-Rest
+
+    AWS->>Data: Encrypt with AWS KMS (CMK)
+    Azure->>Data: Encrypt with Key Vault (CMK)
+    GCP->>Data: Encrypt with Cloud KMS (CMEK)
+
+    Note right of Data: All data encrypted<br/>with customer-managed keys
 ```
 
 ---
