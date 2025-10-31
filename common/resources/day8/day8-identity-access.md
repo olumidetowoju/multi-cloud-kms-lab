@@ -5,6 +5,13 @@ Learn how AWS KMS, Azure Key Vault, and Google Cloud KMS integrate with IAM iden
 
 ---
 
+## 💡 Concept
+
+Each cloud logs every KMS key operation (Encrypt, Decrypt, ReEncrypt, GenerateDataKey, etc.) through its native audit system.  
+This lab shows you how to query those logs and visualize cross-cloud activity from IAM users, roles, and services.
+
+---
+
 ## 🧩 Learning Objectives
 By the end of this lab, you will:
 - Configure IAM principals for each cloud.
@@ -25,75 +32,68 @@ By the end of this lab, you will:
 
 ## 🧭 Diagram — Cross-Cloud IAM Control Flow
 ```mermaid
-flowchart LR
-    subgraph AWS["AWS KMS + IAM Role"]
-        A[App / Lambda] --> B[IAM Role → Key Policy → KMS Key]
-    end
-    subgraph Azure["Azure Key Vault + RBAC"]
-        C[VM / Function] --> D[Managed Identity → Access Policy]
-    end
-    subgraph GCP["GCP KMS + IAM Binding"]
-        E[Service / VM] --> F[Service Account → IAM Role → CryptoKey]
-    end
-    A -.Federation.-> C
-    C -.Multi-Cloud Audit.-> E
+## 🧠 Architecture Diagram
+
+```mermaid
+flowchart TB
+  subgraph Audit
+    A[AWS CloudTrail Logs] --> X[Central Audit Dashboard]
+    B[Azure Monitor Logs] --> X
+    C[GCP Audit Logs] --> X
+  end
+
+  subgraph Identity
+    I1[AWS IAM Users/Roles]
+    I2[Azure Entra ID Accounts]
+    I3[GCP IAM Members]
+  end
+
+  I1 --> A
+  I2 --> B
+  I3 --> C
+  X --> R[Review Findings / Alerts / SIEM]
 ```
 
 ---
 
-## 🔍 IAM Audit & Monitoring
+🪣 Hands-On Steps
+1️⃣ AWS: View Key Usage in CloudTrail
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=Encrypt \
+  --region us-east-1 \
+  --query 'Events[0:5].[EventTime,Username,EventName,Resources]'
 
-### 🟦 AWS — CloudTrail + CloudWatch Logs
-```bash
-aws cloudtrail create-trail --name kms-trail --s3-bucket-name mc-lab-audit
-aws cloudtrail start-logging --name kms-trail
-aws logs create-log-group --log-group-name /mc-lab/kms
-aws logs create-log-stream --log-group-name /mc-lab/kms --log-stream-name kms-events
-View logs in CloudWatch Insights:
-
-sql
-Copy code
-fields @timestamp, eventSource, eventName, userIdentity.arn
-| filter eventSource="kms.amazonaws.com"
-| stats count() by eventName, userIdentity.arn
-🟩 Azure — Monitor + Key Vault Diagnostics
-bash
-Copy code
-az monitor diagnostic-settings create \
-  --name "kv-logs" \
-  --resource $(az keyvault show -n mc-day8-vault --query id -o tsv) \
-  --workspace $(az monitor log-analytics workspace show -g rg -n mc-law --query id -o tsv) \
-  --logs '[{"category":"AuditEvent","enabled":true}]'
-Query with Kusto:
-
-kusto
-Copy code
+2️⃣ Azure: Query KMS Access from Log Analytics
 AzureDiagnostics
-| where Category == "AuditEvent" and OperationName contains "Decrypt"
-| summarize count() by CallerIPAddress, ResultDescription
-🟥 GCP — Cloud Audit Logs + Log Explorer
-bash
-Copy code
-gcloud logging sinks create kms-sink storage.googleapis.com/mc-lab-audit-bucket \
-  --log-filter='resource.type="cloudkms_cryptokey"'
-Example query:
+ | where ResourceProvider == "MICROSOFT.KEYVAULT"
+ | where OperationName contains "Encrypt" or OperationName contains "Decrypt"
+ | project TimeGenerated, Identity, OperationName, ResultType
+ | top 10 by TimeGenerated desc
 
-bash
-Copy code
-resource.type="cloudkms_cryptokey"
-protoPayload.methodName="Decrypt"
-📊 Compliance Aggregation (Optional)
-Export all logs to a central S3 / Blob / GCS bucket.
+3️⃣ GCP: List KMS Access in Audit Logs
+gcloud logging read \
+  'protoPayload.serviceName="cloudkms.googleapis.com" AND protoPayload.methodName:"Decrypt"' \
+  --limit=10 \
+  --format="table(timestamp, protoPayload.authenticationInfo.principalEmail, protoPayload.methodName)"
 
-Use Athena, Sentinel, or BigQuery to join them.
+4️⃣ (Optional) Aggregate Logs Cross-Cloud
 
-Normalize fields (principal, action, timestamp) for unified reports.
+Push all three sources into a central log store (SIEM or OpenSearch) with tags:
 
-✅ Outcome
-You can now:
+mc-lab=kms-day8  environment=dev  source=aws|azure|gcp
 
-Configure cross-cloud IAM access to KMS keys.
+📈 Outcome
 
-Audit key usage events and detect anomalies.
+By the end of this lab you’ll be able to:
 
-Build a unified governance dashboard.
+View who used which key and when in each cloud.
+
+Detect unauthorized or unusual access patterns.
+
+Centralize logs for cross-cloud KMS security monitoring.
+
+🧹 Cleanup
+
+Disable any temporary log streams or storage buckets created for this lab to avoid ongoing charges.
+
+✅ End of Day 8 – Identity & Audit
