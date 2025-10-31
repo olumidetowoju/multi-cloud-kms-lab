@@ -95,3 +95,118 @@ Centralize logs for cross-cloud KMS security monitoring.
 Disable any temporary log streams or storage buckets created for this lab to avoid ongoing charges.
 
 ✅ End of Day 8 – Identity & Audit
+
+🧠 Optional Extension — SIEM Integration (Unified Visibility)
+
+Modern enterprises centralize multi-cloud audit events in a Security Information and Event Management (SIEM) platform such as:
+
+AWS OpenSearch / ELK Stack
+
+Azure Sentinel
+
+GCP Chronicle
+
+Splunk / Datadog / Grafana Loki
+
+This section extends your Day 8 lab to send logs from AWS CloudTrail, Azure Monitor, and GCP Audit Logs to a unified dashboard.
+
+☁️ AWS → OpenSearch (CloudTrail Ingestion)
+
+Create an S3 destination for your CloudTrail logs:
+
+aws s3 mb s3://mc-day8-audit-logs
+
+
+Configure Kinesis Firehose to deliver CloudTrail events into OpenSearch:
+
+aws firehose create-delivery-stream \
+  --delivery-stream-name mc-day8-cloudtrail-stream \
+  --delivery-stream-type DirectPut \
+  --elasticsearch-destination-configuration \
+      IndexName="cloudtrail", \
+      RoleARN="arn:aws:iam::<account-id>:role/FirehoseToOpenSearchRole"
+
+
+View in OpenSearch:
+
+Index name: cloudtrail-*
+
+Filter by: eventSource:"kms.amazonaws.com"
+
+🟦 Azure → Sentinel (Log Analytics Workspace)
+
+Connect Key Vault diagnostics to Log Analytics:
+
+az monitor diagnostic-settings create \
+  --name "kv-logs-to-law" \
+  --resource <key-vault-id> \
+  --workspace <log-analytics-id> \
+  --logs '[{"category":"AuditEvent","enabled":true}]'
+
+
+In Azure Sentinel, create a workbook:
+
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.KEYVAULT"
+| where OperationName has_any ("Encrypt","Decrypt")
+| summarize count() by bin(TimeGenerated, 1h), Identity
+
+🟨 GCP → Cloud Logging / BigQuery / SIEM Export
+
+Create a sink for Audit Logs:
+
+gcloud logging sinks create mc-day8-sink \
+    "pubsub.googleapis.com/projects/<project-id>/topics/mc-day8-topic" \
+    --log-filter='protoPayload.serviceName="cloudkms.googleapis.com"'
+
+
+Stream to BigQuery or SIEM:
+
+Destination: BigQuery dataset (kms_audit)
+
+Optional: Use Dataflow or Pub/Sub → Splunk / Elastic connector
+
+Query sample:
+
+SELECT
+  timestamp,
+  protoPayload.authenticationInfo.principalEmail AS actor,
+  protoPayload.methodName AS operation
+FROM `kms_audit.cloudaudit_googleapis_com_data_access`
+ORDER BY timestamp DESC
+LIMIT 20;
+
+🌐 Visualization Layout
+```mermaid
+flowchart TB
+  subgraph SIEM[Unified SIEM Platform]
+    S1[OpenSearch]:::aws
+    S2[Azure Sentinel]:::az
+    S3[GCP Chronicle]:::gcp
+  end
+
+  AWS[AWS CloudTrail Logs] --> S1
+  AZ[Azure Monitor Logs] --> S2
+  GCP[GCP Audit Logs] --> S3
+  S1 --> D[Dashboards & Alerts]
+  S2 --> D
+  S3 --> D
+```
+
+---
+
+✅ Outcome
+
+By completing this optional extension, you can:
+
+Centralize KMS access logs across all clouds.
+
+Correlate key activity per user, key alias, or resource.
+
+Build visual dashboards showing encryption/decryption operations.
+
+Automate anomaly detection (e.g., sudden increase in Decrypt events).
+
+📘 Next Step
+
+Continue to Day 9 – Governance & Monitoring, where we’ll connect audit patterns to policy enforcement and alerts.
