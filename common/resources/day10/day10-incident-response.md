@@ -19,26 +19,30 @@ Your SIEM flags an unusual spike in `Decrypt` events overnight. You must **conta
 ## 🗺️ High-Level Flow
 
 ```mermaid
-sequenceDiagram
-  autonumber
-  participant SIEM as SIEM/Alerts
-  participant IR as Incident Responder
-  participant AWS as AWS KMS
-  participant AZ as Azure KV
-  participant GCP as GCP KMS
+flowchart TB
+  subgraph Triage
+    A[AWS: CloudTrail] --> X[IR Console]
+    B[Azure: Monitor/KQL] --> X
+    C[GCP: Audit Logs] --> X
+  end
 
-  SIEM->>IR: Alert: Spike in Decrypt events
-  IR->>AWS: Query CloudTrail; Identify Key + Principal
-  IR->>AZ: Query Azure Monitor; Identify Key + Identity
-  IR->>GCP: Query Audit Logs; Identify Key + SA
-  IR->>AWS: Contain: Disable key or attach deny policy
-  IR->>AZ: Contain: Disable key version / set deny role
-  IR->>GCP: Contain: Disable CryptoKeyVersion
-  IR->>AWS: Eradicate: Revoke grants, rotate/create new key
-  IR->>AZ: Eradicate: Rotate new key version, update bindings
-  IR->>GCP: Eradicate: Create new version, setPrimary
-  IR->>IR: Recover: Re-point apps to new keys, verify
-  IR->>SIEM: Document & close with lessons learned
+  subgraph Contain
+    D[AWS: Disable Key / Deny]:::aws
+    E[Azure: Disable Version]:::az
+    F[GCP: Disable Version]:::gcp
+  end
+
+  subgraph Eradicate
+    G[AWS: Revoke Grants + Rotate]:::aws
+    H[Azure: Rotate New Version]:::az
+    I[GCP: New Version + Primary]:::gcp
+  end
+
+  X --> D & E & F --> G & H & I --> R[Recover: Repoint + Verify] --> Doc[Document & Close]
+
+  classDef aws fill:#ffd77a,stroke:#333,stroke-width:1px;
+  classDef az fill:#9fd0ff,stroke:#333,stroke-width:1px;
+  classDef gcp fill:#b7c8ff,stroke:#333,stroke-width:1px;
 ```
 
 ---
